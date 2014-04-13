@@ -1,0 +1,3 @@
+Hi this is hadoop set up for eclipse.
+this is hadoop test
+hello world hadoop test 
