@@ -1,58 +1,46 @@
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Date;
 
-public class Comment {
-     private long postid;
-     private long commentid;
-     private long userid;
-     private String comment;
-     private int rating;
-     private String tag = "DEFAULT";
-	public long getPostid() {
-		return postid;
-	}
-	public void setPostid(long postid) {
-		this.postid = postid;
-	}
-	public long getCommentid() {
-		return commentid;
-	}
-	public void setCommentid(long commentid) {
-		this.commentid = commentid;
-	}
-	public long getUserid() {
-		return userid;
-	}
-	public void setUserid(long userid) {
-		this.userid = userid;
-	}
-	public String getComment() {
-		return comment;
-	}
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-	public int getRating() {
-		return rating;
-	}
-	public void setRating(int rating) {
-		this.rating = rating;
-	}
+import org.codehaus.jackson.annotate.JsonProperty;
 
-	public String getTag() {
-		return tag;
-	}
-	public void setTag(String tag) {
-		this.tag = tag;
+public class Comment implements org.apache.hadoop.io.WritableComparable{
+	/*{ "_id" : ObjectId("532fd8ec4d616e0a4d060000"), 
+		"body" : "That is pretty cool..", 
+		"created_at" : ISODate("2014-03-24T07:04:12.015Z"), 
+		"expert_solution" : false, 
+		"full_name" : "Manish Belsare", 
+		"liked" : "-shivaji@gmail.com,", 
+		"liked_by" : "", 
+		"likes" : 1, 
+		"post_id" : ObjectId("531eb9834d616e0d9b000000"), 
+		"updated_at" : ISODate("2014-04-07T01:54:34.015Z"), 
+		"user_id" : "manish@gmail.com" }*/
+	
+//	@JsonProperty("post_id")
+//	private String postId;
+//	@JsonProperty("_id")
+//	private String id;
+	@JsonProperty("user_id")
+	private String userId;
+	@JsonProperty("expert_solution")
+	private boolean isExpertSoln;
+	private int likes;
+	
+
+	@Override
+	public String toString() {
+		return "Comment [userId=" + userId + ", isExpertSoln=" + isExpertSoln
+				+ ", likes=" + likes + "]";
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((comment == null) ? 0 : comment.hashCode());
-		result = prime * result + (int) (commentid ^ (commentid >>> 32));
-		result = prime * result + (int) (postid ^ (postid >>> 32));
-		result = prime * result + rating;
-		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
-		result = prime * result + (int) (userid ^ (userid >>> 32));
+		result = prime * result + (isExpertSoln ? 1231 : 1237);
+		result = prime * result + likes;
+		result = prime * result + ((userId == null) ? 0 : userId.hashCode());
 		return result;
 	}
 	@Override
@@ -64,32 +52,69 @@ public class Comment {
 		if (getClass() != obj.getClass())
 			return false;
 		Comment other = (Comment) obj;
-		if (comment == null) {
-			if (other.comment != null)
+		if (isExpertSoln != other.isExpertSoln)
+			return false;
+		if (likes != other.likes)
+			return false;
+		if (userId == null) {
+			if (other.userId != null)
 				return false;
-		} else if (!comment.equals(other.comment))
-			return false;
-		if (commentid != other.commentid)
-			return false;
-		if (postid != other.postid)
-			return false;
-		if (rating != other.rating)
-			return false;
-		if (tag == null) {
-			if (other.tag != null)
-				return false;
-		} else if (!tag.equals(other.tag))
-			return false;
-		if (userid != other.userid)
+		} else if (!userId.equals(other.userId))
 			return false;
 		return true;
 	}
+	@JsonProperty("user_id")
+	public String getUserId() {
+		return userId;
+	}
+	@JsonProperty("user_id")
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	@JsonProperty("expert_solution")
+	public boolean isExpertSoln() {
+		return isExpertSoln;
+	}
+	@JsonProperty("expert_solution")
+	public void setExpertSoln(boolean isExpertSoln) {
+		this.isExpertSoln = isExpertSoln;
+	}
+	public int getLikes() {
+		return likes;
+	}
+	public void setLikes(int likes) {
+		this.likes = likes;
+	}
 	@Override
-	public String toString() {
-		return "Comment [postid=" + postid + ", commentid=" + commentid
-				+ ", userid=" + userid + ", comment=" + comment + ", rating="
-				+ rating + ", tag=" + tag + "]";
+	public void readFields(DataInput in) throws IOException {
+		this.likes = in.readInt();
+		this.isExpertSoln = in.readBoolean();
+		this.userId = in.readLine();
+		
+	}
+	@Override
+	public void write(DataOutput out) throws IOException {
+		out.writeInt(likes);
+		out.writeBoolean(isExpertSoln);
+		out.writeChars(userId);
+		
+		
+	}
+	@Override
+	public int compareTo(Object arg0) {
+		Comment other = (Comment)arg0;
+		int idDiff = userId.compareTo(other.userId);
+        if(idDiff != 0){
+            return idDiff;
+        }
+        int likesDiff = new Integer(likes).compareTo(other.likes);
+        if(likesDiff != 0){
+            return likesDiff;
+        }
+        
+        return new Boolean(isExpertSoln).compareTo(other.isExpertSoln);
 	}
 	
+
 
 }
