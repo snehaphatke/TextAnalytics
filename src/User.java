@@ -4,45 +4,24 @@ import java.io.IOException;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-
 public class User  implements org.apache.hadoop.io.WritableComparable{
-	/*{ "city" : "San Jose", 
-		"state" : "CA", 
-		"points" : 0, 
-		"no_of_exp_solutions" : 0, 
-		"expertise_in_tags" : "", 
-		"first_name" : "Paras", 
-		"last_name" : "Agrawal", 
-		"email" : "paras@gmail.com", 
-		"role" : "Learner", 
-		"password_digest" : "$2a$10$DHC964FnLBYzTRz1ODcJ/OGHPJEq1RFjeoNj2gw8qdV5MhA8UHROS", 
-		"area_of_interest" : "Database", 
-		"gender" : "Male", 
-		"birthdate(2i)" : "5", 
-		"birthdate(3i)" : "12", 
-		"birthdate(1i)" : "1990", 
-		"zip_code" : 95112, 
-		"_id" : "paras@gmail.com",
-		"updated_at" : ISODate("2014-04-12T07:15:27.129Z"), 
-		"created_at" : ISODate("2014-04-12T07:15:27.129Z"), 
-		"auth_token" : "d54d3d98f032c338b06b9a2680dbd422", 
-		"roles_mask" : 2 }*/
-	private String email;
-	private int commentAgg = -1;//75% in aggregate
+
+	private String _id;
+	private int commentAgg = -1;   //75% in aggregate
 	@JsonProperty("points")
-	private int activities = -1;//25% in aggregate
+	private int points = -1;       //25% in aggregate
 	@Override
 	public String toString() {
-		return "User [email=" + email + ", commentAgg=" + commentAgg
-				+ ", activities=" + activities + "]";
+		return "User [_id=" + _id + ", commentAgg=" + commentAgg
+				+ ", points=" + points + "]";
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + activities;
+		result = prime * result + points;
 		result = prime * result + commentAgg;
-		result = prime * result + ((email == null) ? 0 : email.hashCode());
+		result = prime * result + ((_id == null) ? 0 : _id.hashCode());
 		return result;
 	}
 	@Override
@@ -54,22 +33,22 @@ public class User  implements org.apache.hadoop.io.WritableComparable{
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		if (activities != other.activities)
+		if (points != other.points)
 			return false;
 		if (commentAgg != other.commentAgg)
 			return false;
-		if (email == null) {
-			if (other.email != null)
+		if (_id == null) {
+			if (other._id != null)
 				return false;
-		} else if (!email.equals(other.email))
+		} else if (!_id.equals(other._id))
 			return false;
 		return true;
 	}
-	public String getEmail() {
-		return email;
+	public String get_id() {
+		return _id;
 	}
-	public void setEmail(String email) {
-		this.email = email;
+	public void set_id(String _id) {
+		this._id = _id;
 	}
 	public int getCommentAgg() {
 		return commentAgg;
@@ -78,35 +57,35 @@ public class User  implements org.apache.hadoop.io.WritableComparable{
 		this.commentAgg = commentAgg;
 	}
 	@JsonProperty("points")
-	public int getActivities() {
-		return activities;
+	public int getPoints() {
+		return points;
 	}
 	@JsonProperty("points")
-	public void setActivities(int activities) {
-		this.activities = activities;
+	public void setPoints(int points) {
+		this.points = points;
 	}
 	@Override
 	public void readFields(DataInput in) throws IOException {
-		this.activities = in.readInt();
+		this.points = in.readInt();
 		this.commentAgg = in.readInt();
-		this.email = in.readLine();
+		this._id = in.readLine();
 		
 	}
 	@Override
 	public void write(DataOutput out) throws IOException {
-		out.writeInt(activities);
+		out.writeInt(points);
 		out.writeInt(commentAgg);
-		out.writeChars(email);
+		out.writeChars(_id);
 		
 	}
 	@Override
 	public int compareTo(Object o) {
 		User other = (User)o;
-		int idDiff = email.compareTo(other.email);
+		int idDiff = _id.compareTo(other._id);
         if(idDiff != 0){
             return idDiff;
         }
-        int actsDiff = new Integer(activities).compareTo(other.activities);
+        int actsDiff = new Integer(points).compareTo(other.points);
         if(actsDiff != 0){
             return actsDiff;
         }

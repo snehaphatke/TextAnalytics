@@ -1,5 +1,3 @@
-
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -22,7 +20,6 @@ public class ExpertIdentifier {
 	public static class Map extends Mapper<LongWritable, Text, Text, Comment> {
 		private ObjectMapper mapper = new ObjectMapper().configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			Comment  comment = mapper.readValue(value.toString(), Comment.class);
 			//System.out.println("SNEHA "+ value);
@@ -31,8 +28,6 @@ public class ExpertIdentifier {
 					
 		}
 	}
-	
-	
 
 	public static class Reduce extends Reducer<Text, Comment, Text, Text> {
 		private ObjectMapper mapper = new ObjectMapper().configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -63,36 +58,40 @@ public class ExpertIdentifier {
 			double nonZeroAgg = Math.min(1, nonZeroCount/25.0);
 			double expAgg = Math.min(1, noOfExpSolns/20.0);
 			double agg = avgAgg*40 + 10 * countAgg + 10 * nonZeroAgg + expAgg*40;
-			System.out.println("SNEHA" + userId + " " + avg + " " + commentsCount + " " + nonZeroCount + " " + agg);
+
+            System.out.println("SNEHA" + userId + " " + avg + " " + commentsCount + " " + nonZeroCount + " " + agg);
 			User user = new User();
-			user.setEmail(userId.toString());
+			user.set_id(userId.toString());
 			user.setCommentAgg((int)(agg + 0.5));
-			
-			
+
 			context.write(new Text(""), new Text(mapper.writeValueAsString(user)));
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		//	        conf.set("fs.default.name", "hdfs://127.0.0.1:9000");
-		//			conf.set("hbase.master", "localhost:60000");
-		//			conf.set("hbase.zookeeper.quorum", "localhost");
-		//			conf.set("hbase.zookeeper.property.clientPort", "2181");
+		//conf.set("fs.default.name", "hdfs://127.0.0.1:9000");
+		//conf.set("hbase.master", "localhost:60000");
+		//conf.set("hbase.zookeeper.quorum", "localhost");
+		//conf.set("hbase.zookeeper.property.clientPort", "2181");
 
 		String intOutputDir = "tmpOut";
 		File file = new File(intOutputDir);
-     	for (String temp : file.list()) {
-     	      File fileDelete = new File(file, temp);
-     	      fileDelete.delete();
-     	   }
-		file.delete();
+        if(file.exists()) {
+            for (String temp : file.list()) {
+                File fileDelete = new File(file, temp);
+                fileDelete.delete();
+            }
+            file.delete();
+        }
 		file = new File(args[2]);
-     	for (String temp : file.list()) {
-     	      File fileDelete = new File(file, temp);
-     	      fileDelete.delete();
-     	   }
-		file.delete();
+        if (file.exists()) {
+            for (String temp : file.list()) {
+                File fileDelete = new File(file, temp);
+                fileDelete.delete();
+            }
+            file.delete();
+        }
 		
 		Job job = new Job(conf, "ExpertIdentifier");
 		job.setJarByClass(ExpertIdentifier.class);
@@ -100,21 +99,15 @@ public class ExpertIdentifier {
 		job.setOutputValueClass(Comment.class);
 
 		job.setMapperClass(ExpertIdentifier.Map.class);
-		//job.setCombinerClass(Reduce.class);
 		job.setReducerClass(ExpertIdentifier.Reduce.class);
 
 		job.setInputFormatClass(TextInputFormat.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 		
-
-
-
-		FileInputFormat.addInputPath(job, new Path(args[0]));
+        FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(intOutputDir));
 
 		job.waitForCompletion(true);
-		
-		
 		
 		job = new Job(conf, "FinalUserAggregateFinder");
 		job.setJarByClass(FinalUserAggregateFinder.class);
@@ -122,7 +115,6 @@ public class ExpertIdentifier {
 		job.setOutputValueClass(User.class);
 
 		job.setMapperClass(FinalUserAggregateFinder.Map.class);
-		//job.setCombinerClass(Reduce.class);
 		job.setReducerClass(FinalUserAggregateFinder.Reduce.class);
 
 		job.setInputFormatClass(TextInputFormat.class);
